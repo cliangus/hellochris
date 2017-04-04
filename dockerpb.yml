@@ -1,0 +1,42 @@
+---
+- hosts: dockers
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: Check Docker
+    yum: name=docker state=latest
+
+  - name: Install pip
+    easy_install: name=pip state=latest
+
+  - name: Install docker-py
+    pip: name=docker-py state=latest
+
+  - name: check or build image    
+    docker_image:
+       path: /root/awsdoc
+       name: prescreen
+       nocache: True
+  - pause:
+       seconds: 30
+
+  - name: run container
+    command: docker run --name rainyseattle -i -d prescreen:latest /bin/bash
+
+  - name: get latest from s3
+    command: docker exec -d rainyseattle aws s3 cp s3://filestaging/ /sourcefiles/ --recursive
+  
+  - name: execute bash
+    command: docker exec -d rainyseattle /bin/bash -c ./getfirst.sh
+
+  - name: execute python
+    command: docker exec -d rainyseattle /usr/bin/env python ./getlast.py
+
+  - name: upload artifacts to s3 bucket
+    command: docker exec -d rainyseattle aws s3 cp ./output/ s3://filedeposit/ --recursive
+
+  - name: stop
+    command: docker stop rainyseattle
+
+  - name: remove
+    command: docker rm rainyseattle
