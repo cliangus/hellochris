@@ -7,5 +7,15 @@ pipeline {
 echo "hello world"'''
       }
     }
+    stage('Sleep') {
+      steps {
+        sleep 5
+      }
+    }
+    stage('Notify') {
+      steps {
+        mail(subject: 'BlueOcean', body: 'Test ')
+      }
+    }
   }
 }
