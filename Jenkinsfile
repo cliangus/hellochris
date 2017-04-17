@@ -14,7 +14,7 @@ echo "hello world"'''
     }
     stage('Notify') {
       steps {
-        mail(subject: 'BlueOcean', body: 'Test ')
+        mail(subject: 'BlueOcean', body: 'Test ', to: 'chrisliang2004@gmail.com')
       }
     }
   }
